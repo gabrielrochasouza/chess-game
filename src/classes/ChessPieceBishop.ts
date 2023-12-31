@@ -1,6 +1,6 @@
 import WhiteBishop from "../assets/svg/white_bishop.svg";
 import BlackBishop from "../assets/svg/black_bishop.svg";
-import { chessBoardArrayType } from "./types";
+import { chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
 
 
 export default class ChessPieceBishop {
@@ -9,66 +9,72 @@ export default class ChessPieceBishop {
         this.svgFile = color === 'white' ? WhiteBishop : BlackBishop;
     }
     svgFile: string;
-
     color: 'white' | 'black';
+    allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));
 
-    possibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
-        let nextLine = l + 1;
-        let nextColumn = c + 1;
-        let previousLine = l - 1;
-        let previousColumn = c - 1;
+    resetPossibleMoves() {
+        this.allPossibleMoves = new Array(8).fill(false).map(() => new Array(8).fill(false));
+    }
 
-        while (chessBoard[nextLine][nextColumn]) {
-            (
-                !chessBoard[nextLine][nextColumn].currentPiece || 
-                chessBoard[nextLine][nextColumn].currentPiece?.color !== this.color
-            ) && (chessBoard[nextLine][nextColumn].isPossibleToMove = true);
+    setLinesAndColumns(l: number, c: number) {
+        return {
+            nextLine: l + 1,
+            nextColumn: c + 1,
+            previousLine: l - 1,
+            previousColumn: c - 1,
+        }
+    }
+
+    bishopPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number): boolean[][] {
+        this.resetPossibleMoves();
+        let {nextLine, nextColumn, previousLine, previousColumn} = this.setLinesAndColumns(l, c);
+
+        const allPossibleMoves = this.allPossibleMoves;
+
+        while (nextLine <= 7 && nextColumn <= 7) {
+            if(!chessBoard[nextLine][nextColumn].currentPiece || chessBoard[nextLine][nextColumn].currentPiece?.color !== this.color) {
+                allPossibleMoves[nextLine][nextColumn] = true
+            }
             if(chessBoard[nextLine][nextColumn].currentPiece) break;
             nextLine = nextLine + 1;
             nextColumn = nextColumn + 1;
         }
 
-        nextLine = l + 1;
-        nextColumn = c + 1;
-        previousLine = l - 1;
-        previousColumn = c - 1;
-        while (chessBoard[nextLine][previousColumn]) {
-            (
-                !chessBoard[nextLine][previousColumn].currentPiece || 
-                chessBoard[nextLine][previousColumn].currentPiece?.color !== this.color
-            ) && (chessBoard[nextLine][previousColumn].isPossibleToMove = true);
+        ({nextLine, nextColumn, previousLine, previousColumn} = this.setLinesAndColumns(l, c));
+        while (nextLine <= 7 && previousColumn >= 0) {
+            if(!chessBoard[nextLine][previousColumn].currentPiece || chessBoard[nextLine][previousColumn].currentPiece?.color !== this.color) {
+                allPossibleMoves[nextLine][previousColumn] = true
+            }
             if(chessBoard[nextLine][previousColumn].currentPiece) break;
             nextLine = nextLine + 1;
-            previousColumn = previousColumn + 1;
+            previousColumn = previousColumn - 1;
         }
 
-        nextLine = l + 1;
-        nextColumn = c + 1;
-        previousLine = l - 1;
-        previousColumn = c - 1;
-        while (chessBoard[previousLine][nextColumn]) {
-            (
-                !chessBoard[previousLine][nextColumn].currentPiece || 
-                chessBoard[previousLine][nextColumn].currentPiece?.color !== this.color
-            ) && (chessBoard[previousLine][nextColumn].isPossibleToMove = true);
+        ({nextLine, nextColumn, previousLine, previousColumn} = this.setLinesAndColumns(l, c));
+        while (previousLine >= 0 &&  nextColumn <= 7) {
+            if(!chessBoard[previousLine][nextColumn].currentPiece || chessBoard[previousLine][nextColumn].currentPiece?.color !== this.color) {
+                allPossibleMoves[previousLine][nextColumn] = true
+            }
             if(chessBoard[previousLine][nextColumn].currentPiece) break;
-            previousLine = previousLine + 1;
+            previousLine = previousLine - 1;
             nextColumn = nextColumn + 1;
         }
 
-        nextLine = l + 1;
-        nextColumn = c + 1;
-        previousLine = l - 1;
-        previousColumn = c - 1;
-        while (chessBoard[previousLine][previousColumn]) {
-            (
-                !chessBoard[previousLine][previousColumn].currentPiece ||
-                chessBoard[previousLine][previousColumn].currentPiece?.color !== this.color
-            ) && (chessBoard[previousLine][previousColumn].isPossibleToMove = true);
+        ({nextLine, nextColumn, previousLine, previousColumn} = this.setLinesAndColumns(l, c));
+        while (previousLine >= 0 && previousColumn >= 0 ) {
+            if(!chessBoard[previousLine][previousColumn].currentPiece || chessBoard[previousLine][previousColumn].currentPiece?.color !== this.color) {
+                allPossibleMoves[previousLine][previousColumn] = true
+            }
             if(chessBoard[previousLine][previousColumn].currentPiece) break;
-            previousLine = previousLine + 1;
-            previousColumn = previousColumn + 1;
+            previousLine = previousLine - 1;
+            previousColumn = previousColumn - 1;
         }
+        return allPossibleMoves;
+    }
+
+    setPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
+        this.allPossibleMoves = this.bishopPossibleMoves(chessBoard, l, c);
+        return chessBoard.map((line: chessBoardType[], l: number) => line.map((column: chessBoardType, c: number) => ({...column, isPossibleToMove: this.allPossibleMoves[l][c]})))
     }
 
 }

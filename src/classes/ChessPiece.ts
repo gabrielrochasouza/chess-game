@@ -1,8 +1,11 @@
 import ChessPieceBishop from "./ChessPieceBishop";
 import ChessPieceKing from "./ChessPieceKing";
+import ChessPieceKnight from "./ChessPieceKnight";
 import ChessPiecePawn from "./ChessPiecePawn";
+import ChessPieceQueen from "./ChessPieceQueen";
+import ChessPieceRook from "./ChessPieceRook";
 
-type PieceType = ChessPiecePawn | ChessPieceBishop | ChessPieceKing;
+type PieceType = ChessPiecePawn | ChessPieceKnight | ChessPieceBishop | ChessPieceKing | ChessPieceQueen | ChessPieceRook;
 
 export default class ChessPiece {
     constructor(l: number, c: number, color: 'white' | 'black', piece: PieceType){
