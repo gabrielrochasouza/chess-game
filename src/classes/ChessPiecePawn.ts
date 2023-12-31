@@ -11,6 +11,7 @@ export default class ChessPiecePawn {
     svgFile: string;
     color: 'white' | 'black'
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));
+    kingPiece: boolean = false;
 
     resetPossibleMoves() {
         this.allPossibleMoves = new Array(8).fill(false).map(() => new Array(8).fill(false));
@@ -22,8 +23,8 @@ export default class ChessPiecePawn {
         const allPossibleMoves = this.allPossibleMoves;
         if(this.color === 'black') {
             if(l == 1) {
-                allPossibleMoves[l + 1][c] = true;
-                allPossibleMoves[l + 2][c] = true;
+                if(!chessBoard[l + 1][c].currentPiece) allPossibleMoves[l + 1][c] = true;
+                if(!chessBoard[l + 1][c].currentPiece && !chessBoard[l + 2][c].currentPiece) allPossibleMoves[l + 2][c] = true;
             }
             if(l + 1 <= 7 && !chessBoard[l + 1][c].currentPiece) allPossibleMoves[l + 1][c] = true;
             if(l + 1 <= 7 && c + 1 <= 7) (chessBoard[l + 1][c + 1].currentPiece && chessBoard[l + 1][c + 1].currentPiece?.color !== this.color) && (allPossibleMoves[l + 1][c + 1] = true);
@@ -32,8 +33,8 @@ export default class ChessPiecePawn {
 
         if(this.color === 'white') {
             if(l == 6) {
-                allPossibleMoves[l - 1 ][c] = true;
-                allPossibleMoves[l - 2][c] = true;
+                if(!chessBoard[l - 1][c].currentPiece) allPossibleMoves[l - 1 ][c] = true;
+                if(!chessBoard[l - 1][c].currentPiece && !chessBoard[l - 2][c].currentPiece) allPossibleMoves[l - 2][c] = true;
             }
             if(l - 1 >= 0 && !chessBoard[l - 1][c].currentPiece)  allPossibleMoves[l - 1][c] = true;
             if(l - 1 >= 0 && c + 1 <= 7) (chessBoard[l - 1][c + 1].currentPiece && chessBoard[l - 1][c + 1].currentPiece?.color !== this.color) && (allPossibleMoves[l - 1][c + 1] = true);
@@ -44,6 +45,22 @@ export default class ChessPiecePawn {
     setPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
         this.allPossibleMoves = this.pawnPossibleMoves(chessBoard, l, c);
         return chessBoard.map((line: chessBoardType[], lIndex: number) => line.map((column: chessBoardType, cIndex: number) => ({...column, isPossibleToMove: this.allPossibleMoves[lIndex][cIndex]})))
+    }
+
+    checkIfItsAttackingKing (color: 'white' | 'black', chessBoard: chessBoardArrayType, l: number, c: number):boolean {
+        this.allPossibleMoves = this.pawnPossibleMoves(chessBoard, l, c);
+        let result = false;
+        chessBoard.map((line: chessBoardType[], l: number) => line.map((column: chessBoardType, c: number) => {
+            if(
+                this.allPossibleMoves[l][c] &&
+                column.currentPiece &&
+                column.currentPiece.color !== color &&
+                column.currentPiece.piece.kingPiece
+            ) {
+                result = true;
+            }
+        }) );
+        return result;
     }
 
 }

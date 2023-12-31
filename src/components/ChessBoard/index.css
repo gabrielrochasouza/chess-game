@@ -14,7 +14,31 @@
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
+    position: relative;
 }
+
+.square img {
+    z-index: 10;
+}
+
+.square-check-mark {
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: color-change infinite .4s ease-in-out;
+}
+
+@keyframes color-change {
+    from {
+        background-color: rgba(24, 18, 0, 0.312);
+    }
+    to {
+        background-color: rgba(246, 255, 0, 0.236);
+    }
+  }
 
 .possible-to-click {
     cursor: pointer;
@@ -35,4 +59,16 @@
     background-color: red;
     width: 40px;
     height: 40px;
+}
+
+.turn-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 12px 0 0 0;
+}
+
+.info-block {
+    height: 72px;
 }

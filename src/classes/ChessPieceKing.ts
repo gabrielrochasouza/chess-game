@@ -9,6 +9,7 @@ export default class ChessPieceKing {
         this.svgFile = color === 'white' ? WhiteKing : BlackKing;
     }
     svgFile: string;
+    kingPiece: boolean = true;
     color: 'white' | 'black';
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));
 
@@ -36,6 +37,22 @@ export default class ChessPieceKing {
     setPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
         this.allPossibleMoves = this.kingPossibleMoves(chessBoard, l, c);
         return chessBoard.map((line: chessBoardType[], l: number) => line.map((column: chessBoardType, c: number) => ({...column, isPossibleToMove: this.allPossibleMoves[l][c]})))
+    }
+
+    checkIfItsAttackingKing (color: 'white' | 'black', chessBoard: chessBoardArrayType, l: number, c: number):boolean {
+        this.allPossibleMoves = this.kingPossibleMoves(chessBoard, l, c);
+        let result = false;
+        chessBoard.map((line: chessBoardType[], l: number) => line.map((column: chessBoardType, c: number) => {
+            if(
+                this.allPossibleMoves[l][c] &&
+                column.currentPiece &&
+                column.currentPiece.color !== color &&
+                column.currentPiece.piece.kingPiece
+            ) {
+                result = true;
+            }
+        }) );
+        return result;
     }
 
 }
