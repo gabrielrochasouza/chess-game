@@ -1,9 +1,9 @@
 import WhiteKing from "../assets/svg/white_king.svg";
 import BlackKing from "../assets/svg/black_king.svg";
-import { chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
 
 
-export default class ChessPieceKing {
+export default class ChessPieceKing implements ClassPieceType {
     constructor(color: 'white' | 'black') {
         this.color = color;
         this.svgFile = color === 'white' ? WhiteKing : BlackKing;
@@ -53,6 +53,10 @@ export default class ChessPieceKing {
             }
         }) );
         return result;
+    }
+
+    checkPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
+        return this.kingPossibleMoves(chessBoard, l, c);
     }
 
 }

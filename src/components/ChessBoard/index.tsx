@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import chessBoardInstance from "../../classes/ChessBoard";
-import ChessPiece from "../../classes/ChessPiece";
 import "./index.css"
 import { chessBoardType } from "../../classes/types";
 
@@ -11,23 +10,29 @@ function ChessBoard() {
     turnOfPlay,
     blackPlayerOnCheck,
     whitePlayerOnCheck,
+    checkMate,
   } = chessBoardInstance;
-  const [, setSelectedPiece] = useState<ChessPiece>(null);
+  const [, updateState] = useState();
+  const forceUpdate = useCallback(() => updateState({} as undefined), []);
 
   const clickOnCellHandler = (l: number, c: number)=> {
-    if (chessBoardInstance.mode === 'selectPiece') {
-        chessBoardInstance.selectPiece(l, c)
-        setSelectedPiece(chessBoardInstance.chessBoard[l][c].currentPiece);
-    } else if (chessBoardInstance.mode === 'movePiece' && chessBoard[l][c].isPossibleToMove) {
-        chessBoardInstance.movePiece(l, c)
-        setSelectedPiece(null);
-    } else if (chessBoardInstance.mode === 'movePiece' && chessBoard[l][c].currentPiece?.color === turnOfPlay) {
-        chessBoardInstance.selectPiece(l, c)
-        setSelectedPiece(chessBoardInstance.chessBoard[l][c].currentPiece);
-    } else {
-        chessBoardInstance.changeModeToSelectMode();
-        setSelectedPiece(null);
+    if (!checkMate) {
+        if (chessBoardInstance.mode === 'selectPiece') {
+            chessBoardInstance.selectPiece(l, c)
+        } else if (chessBoardInstance.mode === 'movePiece' && chessBoard[l][c].isPossibleToMove) {
+            chessBoardInstance.movePiece(l, c)
+        } else if (chessBoardInstance.mode === 'movePiece' && chessBoard[l][c].currentPiece?.color === turnOfPlay) {
+            chessBoardInstance.selectPiece(l, c)
+        } else {
+            chessBoardInstance.changeModeToSelectMode();
+        }
+        forceUpdate()
     }
+  }
+
+  const restartGameHandler = ()=> {
+    chessBoardInstance.startGame();
+    forceUpdate();
   }
 
   return (
@@ -40,7 +45,7 @@ function ChessBoard() {
                         className={column.isPossibleToMove ? 'square possibleToMove' : 'square'}
                         onClick={() => clickOnCellHandler(l, c)}
                         style={{ 
-                            backgroundColor: column.color === 'white' ? '#ffd2b8': '#512c16', 
+                            backgroundColor: column.squareColor === 'white' ? '#ffd2b8': '#512c16', 
                             border: column.isSelected ? '4px red solid ' : ''
 
                         }}
@@ -72,8 +77,9 @@ function ChessBoard() {
                     Vez das peças {turnOfPlay === 'white' ? 'brancas': 'pretas'}
                 </h3>
             </div>
-            { blackPlayerOnCheck && <span>Peças pretas estão em check!</span>}
-            { whitePlayerOnCheck && <span>Peças brancas estão em check!</span>}
+            { (!checkMate && blackPlayerOnCheck) && <span>Peças pretas estão em check!</span>}
+            { (!checkMate && whitePlayerOnCheck) && <span>Peças brancas estão em check!</span>}
+            { checkMate && <button onClick={restartGameHandler}>Restart Game</button> }
         </div>
     </>
   )

@@ -1,9 +1,9 @@
 import WhitePawn from "../assets/svg/white_pawn.svg";
 import BlackPawn from "../assets/svg/black_pawn.svg";
-import { chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
 
 
-export default class ChessPiecePawn {
+export default class ChessPiecePawn implements ClassPieceType {
     constructor(color: 'white' | 'black') {
         this.color = color;
         this.svgFile = color === 'white' ? WhitePawn : BlackPawn;
@@ -61,6 +61,10 @@ export default class ChessPiecePawn {
             }
         }) );
         return result;
+    }
+
+    checkPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
+        return this.pawnPossibleMoves(chessBoard, l, c);
     }
 
 }

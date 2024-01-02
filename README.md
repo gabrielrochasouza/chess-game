@@ -4,8 +4,11 @@ This is a chess game created using react and typescript, in this application, yo
 
 Features to be implemented:
 
-[ ] Checkmate verification
-[ ] King rook
-[ ] pawn change to queen
+[x] Checkmate verification
+
 [ ] draw
+
+[ ] pawn change to queen
+
+[ ] King rook
 

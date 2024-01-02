@@ -1,9 +1,9 @@
 import WhiteBishop from "../assets/svg/white_bishop.svg";
 import BlackBishop from "../assets/svg/black_bishop.svg";
-import { chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
 
 
-export default class ChessPieceBishop {
+export default class ChessPieceBishop implements ClassPieceType {
     constructor(color: 'white' | 'black') {
         this.color = color;
         this.svgFile = color === 'white' ? WhiteBishop : BlackBishop;
@@ -92,6 +92,10 @@ export default class ChessPieceBishop {
             }
         }) );
         return result;
+    }
+
+    checkPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
+        return this.bishopPossibleMoves(chessBoard, l, c);
     }
 
 }

@@ -1,7 +1,7 @@
 import ChessPiece from "./ChessPiece";
 
 export type chessBoardType = {
-    color: string,
+    squareColor: string,
     currentPiece?: ChessPiece | null,
     isPossibleToMove: boolean,
     isSelected: boolean,
@@ -10,3 +10,21 @@ export type chessBoardType = {
 export type possibleMovesType = boolean[][]
 
 export type chessBoardArrayType = chessBoardType[][];
+
+export interface ClassPieceType {
+    svgFile: string,
+    color: 'white' | 'black',
+    allPossibleMoves: possibleMovesType,
+    kingPiece: boolean,
+    resetPossibleMoves: ()=> void,
+    setLinesAndColumns?: (l: number, c: number) => {
+        nextLine: number,
+        nextColumn: number,
+        previousLine: number,
+        previousColumn: number,
+    },
+    setPossibleMoves: (chessBoard: chessBoardArrayType, l: number, c: number) => chessBoardArrayType,
+    checkIfItsAttackingKing: (color: 'white' | 'black', chessBoard: chessBoardArrayType, l: number, c: number) => boolean,
+    checkPossibleMoves: (chessBoard: chessBoardArrayType, l: number, c: number)=> possibleMovesType,
+}
+

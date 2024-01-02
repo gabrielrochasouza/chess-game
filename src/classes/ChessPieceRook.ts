@@ -1,9 +1,9 @@
 import WhiteRook from "../assets/svg/white_rook.svg";
 import BlackRook from "../assets/svg/black_rook.svg";
-import { chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
 
 
-export default class ChessPieceRook {
+export default class ChessPieceRook implements ClassPieceType {
     constructor(color: 'white' | 'black') {
         this.color = color;
         this.svgFile = color === 'white' ? WhiteRook : BlackRook;
@@ -89,6 +89,10 @@ export default class ChessPieceRook {
             }
         }) );
         return result;
+    }
+
+    checkPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
+        return this.rookPossibleMoves(chessBoard, l, c);
     }
 
 }

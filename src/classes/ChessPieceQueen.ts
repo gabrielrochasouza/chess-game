@@ -1,11 +1,11 @@
 import WhiteQueen from "../assets/svg/white_queen.svg";
 import BlackQueen from "../assets/svg/black_queen.svg";
-import { chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
 import ChessPieceBishop from "./ChessPieceBishop";
 import ChessPieceRook from "./ChessPieceRook";
 
 
-export default class ChessPieceQueen {
+export default class ChessPieceQueen implements ClassPieceType {
     constructor(color: 'white' | 'black') {
         this.color = color;
         this.svgFile = color === 'white' ? WhiteQueen : BlackQueen;
@@ -47,6 +47,10 @@ export default class ChessPieceQueen {
             }
         }) );
         return result;
+    }
+
+    checkPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {
+        return this.queenPossibleMoves(chessBoard, l, c);
     }
 
 }
