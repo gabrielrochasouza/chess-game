@@ -1,6 +1,6 @@
 import WhiteBishop from "../assets/svg/white_bishop.svg";
 import BlackBishop from "../assets/svg/black_bishop.svg";
-import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, pieceNamesType, possibleMovesType } from "./types";
 
 
 export default class ChessPieceBishop implements ClassPieceType {
@@ -8,6 +8,7 @@ export default class ChessPieceBishop implements ClassPieceType {
         this.color = color;
         this.svgFile = color === 'white' ? WhiteBishop : BlackBishop;
     }
+    name: pieceNamesType = 'bishop';
     svgFile: string;
     color: 'white' | 'black';
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));

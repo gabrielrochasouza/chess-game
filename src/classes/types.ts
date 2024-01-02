@@ -11,7 +11,10 @@ export type possibleMovesType = boolean[][]
 
 export type chessBoardArrayType = chessBoardType[][];
 
+export type pieceNamesType = 'pawn' | 'queen' | 'king' | 'knight' | 'bishop' | 'rook';
+
 export interface ClassPieceType {
+    name: pieceNamesType,
     svgFile: string,
     color: 'white' | 'black',
     allPossibleMoves: possibleMovesType,

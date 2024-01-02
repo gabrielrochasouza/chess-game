@@ -1,6 +1,6 @@
 import WhiteKnight from "../assets/svg/white_knight.svg";
 import BlackKnight from "../assets/svg/black_knight.svg";
-import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, pieceNamesType, possibleMovesType } from "./types";
 
 
 export default class ChessPieceKnight implements ClassPieceType {
@@ -8,6 +8,7 @@ export default class ChessPieceKnight implements ClassPieceType {
         this.color = color;
         this.svgFile = color === 'white' ? WhiteKnight : BlackKnight;
     }
+    name: pieceNamesType = 'knight';
     svgFile: string;
     color: 'white' | 'black';
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));

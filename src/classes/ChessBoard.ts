@@ -9,7 +9,7 @@ import PieceMoveSoundEffect from '../assets/sound/piece_move_sound.mp3';
 import ChessCheckSoundEffect from '../assets/sound/check_sound.wav';
 import ChessCheckMateSoundEffect from '../assets/sound/check_mate_sound.wav';
 
-import { chessBoardArrayType } from "./types";
+import { chessBoardArrayType, pieceNamesType } from "./types";
 import { toast } from "react-toastify";
 
 class ChessBoard {
@@ -28,6 +28,10 @@ class ChessBoard {
 
     private whiteKingPiece: ChessPiece;
     private blackKingPiece: ChessPiece;
+
+    public pawnReachedEndOfChessBoard: boolean = false;
+    private pawnPositionLine: number;
+    private pawnPositionColumn: number;
 
     private setPiecesInBoard() {
         new Array(8).fill(0).forEach((_, c:number) => {
@@ -72,25 +76,66 @@ class ChessBoard {
             const currentPiece = this.chessBoard[this.previousLine][this.previousColumn].currentPiece;
             currentPiece.setChessPiece(this.chessBoard, targetLine, targetColumn);
             
+            const nextTurn = this.turnOfPlay === 'white' ? 'black' : 'white';
+            
             this.changeModeToSelectMode();
-            const playerOnCheck = this.verifyIfPlayerIsOnCheck(this.turnOfPlay);
 
-            this.turnOfPlay = this.turnOfPlay === 'white' ? 'black' : 'white';
-            this.blackPlayerOnCheck = playerOnCheck && this.turnOfPlay === 'black';
-            this.whitePlayerOnCheck = playerOnCheck && this.turnOfPlay === 'white';
-            this.selectedPiece = null;
-            new Audio(PieceMoveSoundEffect).play();
+            this.checkVerification(this.turnOfPlay);
+            
+            this.turnOfPlay = nextTurn;
 
-            if (playerOnCheck) {
-                new Audio(ChessCheckSoundEffect).play();
-            }
-            if (this.verifyCheckMate(this.turnOfPlay)) {
-                new Audio(ChessCheckMateSoundEffect).play();
-                toast.success(`Jogador das peças ${this.turnOfPlay === 'white' ? 'Pretas' : 'Brancas'} ganhou!!`);
-                console.log(this.chessBoard);
-                this.checkMate = true;
+            if(currentPiece.piece.name === 'pawn' && !this.checkMate) {
+                if (currentPiece.color === 'white' && currentPiece.l === 0) {
+                    this.pawnReachedEndOfChessBoard = true;
+                    this.pawnPositionLine = targetLine;
+                    this.pawnPositionColumn = targetColumn;
+                }
+                if (currentPiece.color === 'black' && currentPiece.l === 7) {
+                    this.pawnReachedEndOfChessBoard = true;
+                    this.pawnPositionLine = targetLine;
+                    this.pawnPositionColumn = targetColumn;
+                }
             }
         }
+    }
+
+    public checkVerification (turnOfPlay: 'white' | 'black') {
+        const nextTurn = turnOfPlay === 'white' ? 'black' : 'white';
+        const playerOnCheck = this.verifyIfPlayerIsOnCheck(turnOfPlay);
+        this.blackPlayerOnCheck = playerOnCheck && nextTurn === 'black';
+        this.whitePlayerOnCheck = playerOnCheck && nextTurn === 'white';
+        this.selectedPiece = null;
+        new Audio(PieceMoveSoundEffect).play();
+        
+        if (playerOnCheck) {
+            new Audio(ChessCheckSoundEffect).play();
+        }
+        if (this.verifyCheckMate(nextTurn)) {
+            new Audio(ChessCheckMateSoundEffect).play();
+            toast.success(`Jogador das peças ${nextTurn === 'white' ? 'Pretas' : 'Brancas'} ganhou!!`);
+            this.checkMate = true;
+        }
+    }
+
+    public setSelectedPieceInPawnPlace (pieceName: pieceNamesType) {
+        const currentPlayerColor = this.turnOfPlay === 'white' ? 'black' : 'white';
+        const l = this.pawnPositionLine;
+        const c = this.pawnPositionColumn;
+        
+        let chessPiece;
+        if (pieceName === 'bishop') chessPiece = new ChessPieceBishop(currentPlayerColor);
+        if (pieceName === 'rook') chessPiece = new ChessPieceRook(currentPlayerColor);
+        if (pieceName === 'queen') chessPiece = new ChessPieceQueen(currentPlayerColor);
+        if (pieceName === 'knight') chessPiece = new ChessPieceKnight(currentPlayerColor);
+        
+        this.chessBoard[this.pawnPositionLine][this.pawnPositionColumn].currentPiece = new ChessPiece(l, c, currentPlayerColor, chessPiece);
+        
+        // reset pawn
+        this.pawnReachedEndOfChessBoard = false;
+        this.pawnPositionColumn = null;
+        this.pawnPositionLine = null;
+
+        this.checkVerification(currentPlayerColor);
     }
 
     public selectPiece(l: number, c: number) {
@@ -125,6 +170,7 @@ class ChessBoard {
         this.checkMate = false;
         this.whitePlayerOnCheck = false;
         this.blackPlayerOnCheck = false;
+        this.pawnReachedEndOfChessBoard = false;
     }
 
     public changeModeToSelectMode() {
@@ -205,12 +251,7 @@ class ChessBoard {
             }) 
         );
         const checkMate = possibleResults.every(r => r);
-        if (checkMate) {
-            console.log(colorOfplayerBeingAttacked);
-            console.log(possibleResults);
-            console.log('pieces:', pieces);
-            console.log('');
-        }
+
         return checkMate;
     }
 

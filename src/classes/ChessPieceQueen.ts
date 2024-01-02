@@ -1,6 +1,6 @@
 import WhiteQueen from "../assets/svg/white_queen.svg";
 import BlackQueen from "../assets/svg/black_queen.svg";
-import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, pieceNamesType, possibleMovesType } from "./types";
 import ChessPieceBishop from "./ChessPieceBishop";
 import ChessPieceRook from "./ChessPieceRook";
 
@@ -10,6 +10,7 @@ export default class ChessPieceQueen implements ClassPieceType {
         this.color = color;
         this.svgFile = color === 'white' ? WhiteQueen : BlackQueen;
     }
+    name: pieceNamesType = 'queen';
     svgFile: string;
     color: 'white' | 'black';
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));

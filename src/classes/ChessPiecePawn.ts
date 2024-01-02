@@ -1,6 +1,6 @@
 import WhitePawn from "../assets/svg/white_pawn.svg";
 import BlackPawn from "../assets/svg/black_pawn.svg";
-import { ClassPieceType, chessBoardArrayType, chessBoardType, possibleMovesType } from "./types";
+import { ClassPieceType, chessBoardArrayType, chessBoardType, pieceNamesType, possibleMovesType } from "./types";
 
 
 export default class ChessPiecePawn implements ClassPieceType {
@@ -8,6 +8,7 @@ export default class ChessPiecePawn implements ClassPieceType {
         this.color = color;
         this.svgFile = color === 'white' ? WhitePawn : BlackPawn;
     }
+    name: pieceNamesType = 'pawn';
     svgFile: string;
     color: 'white' | 'black'
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));

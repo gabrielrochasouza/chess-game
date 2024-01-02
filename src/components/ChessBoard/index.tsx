@@ -1,8 +1,17 @@
 import { useState, useCallback } from "react";
 import chessBoardInstance from "../../classes/ChessBoard";
 import "./index.css"
-import { chessBoardType } from "../../classes/types";
+import { chessBoardType, pieceNamesType } from "../../classes/types";
 
+import BlackBishop from "../../assets/svg/black_bishop.svg";
+import BlackRook from "../../assets/svg/black_rook.svg";
+import BlackKnight from "../../assets/svg/black_knight.svg";
+import BlackQueen from "../../assets/svg/black_queen.svg";
+
+import WhiteBishop from "../../assets/svg/white_bishop.svg";
+import WhiteRook from "../../assets/svg/white_rook.svg";
+import WhiteKnight from "../../assets/svg/white_knight.svg";
+import WhiteQueen from "../../assets/svg/white_queen.svg";
 
 function ChessBoard() {
   const {
@@ -35,6 +44,11 @@ function ChessBoard() {
     forceUpdate();
   }
 
+  const pieceSelectionHandler = (pieceName: pieceNamesType) => {
+    chessBoardInstance.setSelectedPieceInPawnPlace(pieceName);
+    forceUpdate();
+  }
+
   return (
     <>
         <div className='board'>
@@ -45,7 +59,7 @@ function ChessBoard() {
                         className={column.isPossibleToMove ? 'square possibleToMove' : 'square'}
                         onClick={() => clickOnCellHandler(l, c)}
                         style={{ 
-                            backgroundColor: column.squareColor === 'white' ? '#ffd2b8': '#512c16', 
+                            backgroundColor: column.squareColor === 'white' ? '#ffd2b8': '#9d4c1c', 
                             border: column.isSelected ? '4px red solid ' : ''
 
                         }}
@@ -81,6 +95,27 @@ function ChessBoard() {
             { (!checkMate && whitePlayerOnCheck) && <span>Peças brancas estão em check!</span>}
             { checkMate && <button onClick={restartGameHandler}>Restart Game</button> }
         </div>
+        { chessBoardInstance.pawnReachedEndOfChessBoard && (
+            <div className="select-piece">
+                <h2>Select One Piece</h2>
+                {chessBoardInstance.turnOfPlay === 'white' ? (
+                    <div className="black-pieces">
+                        <img src={BlackBishop} onClick={() => pieceSelectionHandler('bishop')} alt="black bishop piece" />
+                        <img src={BlackKnight} onClick={() => pieceSelectionHandler('knight')} alt="black knight piece" />
+                        <img src={BlackQueen} onClick={() => pieceSelectionHandler('queen')} alt="black queen piece" />
+                        <img src={BlackRook} onClick={() => pieceSelectionHandler('rook')} alt="black rook piece" />
+                    </div>
+                ) : (
+                    <div className="white-pieces">
+                        <img src={WhiteBishop} onClick={() => pieceSelectionHandler('bishop')} alt="white bishop piece" />
+                        <img src={WhiteKnight} onClick={() => pieceSelectionHandler('knight')} alt="white knight piece" />
+                        <img src={WhiteQueen} onClick={() => pieceSelectionHandler('queen')} alt="white queen piece" />
+                        <img src={WhiteRook} onClick={() => pieceSelectionHandler('rook')} alt="white rook piece" />
+                    </div>
+                )}
+
+            </div>
+        )}
     </>
   )
 }
