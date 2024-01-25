@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, MouseEvent } from "react";
 import chessBoardInstance from "../../classes/ChessBoard";
 import "./index.css"
 import { chessBoardType, pieceNamesType } from "../../classes/types";
@@ -13,6 +13,13 @@ import WhiteRook from "../../assets/svg/white_rook.svg";
 import WhiteKnight from "../../assets/svg/white_knight.svg";
 import WhiteQueen from "../../assets/svg/white_queen.svg";
 
+import Draggable from 'react-draggable';
+
+interface IControlledPosition {
+    x: number;
+    y: number;
+}
+
 function ChessBoard() {
   const {
     chessBoard, 
@@ -21,7 +28,10 @@ function ChessBoard() {
     whitePlayerOnCheck,
     checkMate,
   } = chessBoardInstance;
+  const cPosition = new Array(8).fill([]).map(() => new Array(8).fill({ x:0, y: 0}));
+
   const [, updateState] = useState();
+  const [constrolledPosition, setControlledPosition] = useState<IControlledPosition[][]>(cPosition as IControlledPosition[][]);
   const forceUpdate = useCallback(() => updateState({} as undefined), []);
 
   const clickOnCellHandler = (l: number, c: number)=> {
@@ -30,12 +40,15 @@ function ChessBoard() {
             chessBoardInstance.selectPiece(l, c)
         } else if (chessBoardInstance.mode === 'movePiece' && chessBoard[l][c].isPossibleToMove) {
             chessBoardInstance.movePiece(l, c)
+            forceUpdate()
+            return true;
         } else if (chessBoardInstance.mode === 'movePiece' && chessBoard[l][c].currentPiece?.color === turnOfPlay) {
             chessBoardInstance.selectPiece(l, c)
         } else {
             chessBoardInstance.changeModeToSelectMode();
         }
         forceUpdate()
+        return false;
     }
   }
 
@@ -53,26 +66,51 @@ function ChessBoard() {
     <>
         <div className='board'>
             { chessBoard.map((line:chessBoardType[], l: number) => (
-                line.map((column: chessBoardType, c: number) => (
+                line.map((square: chessBoardType, c: number) => (
                     <div 
                         key={'square:' + l + c}
-                        className={column.isPossibleToMove ? 'square possibleToMove' : 'square'}
+                        className={square.isPossibleToMove ? 'square possibleToMove' : 'square'}
                         onClick={() => clickOnCellHandler(l, c)}
                         style={{ 
-                            backgroundColor: column.squareColor === 'white' ? '#ffd2b8': '#9d4c1c', 
-                            border: column.isSelected ? '4px red solid ' : ''
-
+                            backgroundColor: square.squareColor === 'white' ? '#ffd2b8': '#9d4c1c', 
+                            border: square.isSelected ? '4px red solid ' : ''
                         }}
                     >
-                        {column.currentPiece && (
-                            <img draggable={false} className={column.currentPiece.color === chessBoardInstance.turnOfPlay ? 'possible-to-click' : ''} src={column.currentPiece.piece.svgFile} />
+                        {square.currentPiece && (
+                            (
+                            <Draggable
+                                disabled={turnOfPlay !== square.currentPiece.color}
+                                position={constrolledPosition[l][c]}
+                                onStart={(e: MouseEvent<HTMLElement>) => {
+                                    clickOnCellHandler(l, c)
+                                    const element = e.target as HTMLInputElement;
+                                    element.style.zIndex = '20'
+                                }}
+                                onStop={(e: MouseEvent<HTMLElement>) => {
+                                    const element = e.target as HTMLInputElement;
+                                    element.style.zIndex = '10'
+                                    const squareSize = document.querySelector('.square').clientWidth;
+                                    const [deltaC, deltaL] = element.style.transform.split('(')[1].replace(')', '').split(',').map(n => Math.round(Number(n.slice(0,-2)) / squareSize) )
+                                    if (
+                                        ((l + deltaL) >= 0 && (l + deltaL) <= 7) && ((c + deltaC) >= 0 && (c + deltaC) <= 7)
+                                    ) {
+                                        if (!clickOnCellHandler(l + deltaL, c + deltaC)) {
+                                            setControlledPosition(constrolledPosition.map((line, cl) => line.map((square, cc) => cl === l && cc === c ? ({x: 0, y: 0}) : square )))
+                                        }
+                                    }
+
+                                }}
+                            >
+                                <img draggable={false} className={square.currentPiece.color === chessBoardInstance.turnOfPlay ? 'possible-to-click' : ''} src={square.currentPiece.piece.svgFile} />
+                            </Draggable>
+                            )
                         )}
                         {(
-                            column.currentPiece && 
-                            column.currentPiece.piece.kingPiece &&
+                            square.currentPiece && 
+                            square.currentPiece.piece.kingPiece &&
                             (
-                                (column.currentPiece.color === 'black' && blackPlayerOnCheck) ||
-                                (column.currentPiece.color === 'white' && whitePlayerOnCheck)
+                                (square.currentPiece.color === 'black' && blackPlayerOnCheck) ||
+                                (square.currentPiece.color === 'white' && whitePlayerOnCheck)
                             )
                         ) && (
                             <div className="square-check-mark"></div>
