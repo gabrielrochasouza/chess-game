@@ -33,6 +33,8 @@ class ChessBoard {
     private pawnPositionLine: number;
     private pawnPositionColumn: number;
 
+    public deadPieces: ChessPiece[] = [];
+
     private setPiecesInBoard() {
         new Array(8).fill(0).forEach((_, c:number) => {
             this.chessBoard[6][c].currentPiece = new ChessPiece(6, c, 'white', new ChessPiecePawn('white'));
@@ -63,8 +65,34 @@ class ChessBoard {
     private seePossibleMoves(l: number, c: number) {
         if (this.chessBoard[l][c].currentPiece) {
             this.chessBoard[l][c].isSelected = true;
-            this.chessBoard = this.chessBoard[l][c].currentPiece?.piece.setPossibleMoves(this.chessBoard, l, c);
+            this.chessBoard = this.filterMovesThatWouldResultInCheck(
+                l,
+                c,
+                this.chessBoard[l][c].currentPiece?.piece.setPossibleMoves(this.chessBoard, l, c)
+            );
         }
+    }
+
+    public filterMovesThatWouldResultInCheck(
+        previousLine: number,
+        previousColumn: number,
+        chessBoardWithPossibleMoves: chessBoardArrayType
+    ) {
+        return chessBoardWithPossibleMoves.map((line, targetLine) => line.map((square, targetColumn) => {
+            if (square.isPossibleToMove) {
+                return {
+                    ...square,
+                    isPossibleToMove: !this.verifyIfNextMoveWillBeCheck(
+                        this.turnOfPlay,
+                        targetLine,
+                        targetColumn,
+                        previousLine,
+                        previousColumn,
+                    ),
+                }
+            }
+            return square;
+        }));
     }
 
     public movePiece(targetLine: number, targetColumn: number) {
@@ -73,30 +101,42 @@ class ChessBoard {
                 toast.error('Você não pode mover para aí pois está ou estará em Check');
                 return;
             }
+
+            if (this.chessBoard[targetLine][targetColumn].currentPiece) {
+                this.deadPieces.push(this.chessBoard[targetLine][targetColumn].currentPiece);
+            }
             const currentPiece = this.chessBoard[this.previousLine][this.previousColumn].currentPiece;
             currentPiece.setChessPiece(this.chessBoard, targetLine, targetColumn);
-            
-            const nextTurn = this.turnOfPlay === 'white' ? 'black' : 'white';
             
             this.changeModeToSelectMode();
 
             this.checkVerification(this.turnOfPlay);
             
-            this.turnOfPlay = nextTurn;
+            this.turnOfPlay = this.turnOfPlay === 'white' ? 'black' : 'white';
 
-            if(currentPiece.piece.name === 'pawn' && !this.checkMate) {
-                if (currentPiece.color === 'white' && currentPiece.l === 0) {
-                    this.pawnReachedEndOfChessBoard = true;
-                    this.pawnPositionLine = targetLine;
-                    this.pawnPositionColumn = targetColumn;
-                }
-                if (currentPiece.color === 'black' && currentPiece.l === 7) {
-                    this.pawnReachedEndOfChessBoard = true;
-                    this.pawnPositionLine = targetLine;
-                    this.pawnPositionColumn = targetColumn;
-                }
+            this.checkIfPawnReachedEndOfChessBoard(currentPiece, targetLine, targetColumn);
+
+            this.setMarkToPreviousSquareMove(targetLine, targetColumn);
+        }
+    }
+
+    private checkIfPawnReachedEndOfChessBoard (currentPiece: ChessPiece, targetLine: number, targetColumn: number) {
+        if(currentPiece.piece.name === 'pawn' && !this.checkMate) {
+            if (
+                (currentPiece.color === 'white' && currentPiece.l === 0) ||
+                (currentPiece.color === 'black' && currentPiece.l === 7)
+            ) {
+                this.pawnReachedEndOfChessBoard = true;
+                this.pawnPositionLine = targetLine;
+                this.pawnPositionColumn = targetColumn;
             }
         }
+    }
+
+    private setMarkToPreviousSquareMove (targetLine: number, targetColumn: number) {
+        this.chessBoard = this.chessBoard.map(line => line.map(square => ({ ...square, isPreviousSelectedSquareMove: false, isPreviousTargetSquareMove: false })))
+        this.chessBoard[this.previousLine][this.previousColumn].isPreviousSelectedSquareMove = true;
+        this.chessBoard[targetLine][targetColumn].isPreviousTargetSquareMove = true;
     }
 
     public checkVerification (turnOfPlay: 'white' | 'black') {
@@ -107,13 +147,12 @@ class ChessBoard {
         this.selectedPiece = null;
         new Audio(PieceMoveSoundEffect).play();
         
-        if (playerOnCheck) {
-            new Audio(ChessCheckSoundEffect).play();
-        }
         if (this.verifyCheckMate(nextTurn)) {
             new Audio(ChessCheckMateSoundEffect).play();
             toast.success(`Jogador das peças ${nextTurn === 'white' ? 'Pretas' : 'Brancas'} ganhou!!`);
             this.checkMate = true;
+        } else if (playerOnCheck) {
+            new Audio(ChessCheckSoundEffect).play();
         }
     }
 
@@ -151,10 +190,12 @@ class ChessBoard {
 
     private createInitialChessBoardArray() {
         this.chessBoard = new Array(8).fill(0).map((_, i) => new Array(8).fill(0).map((_,j) => ({
-            squareColor: (i + j) % 2 === 1 ? 'black' : 'white',
+            squareColor: (i + j) % 2 === 1 ? '#0e857b' : '#ddcaca',
             currentPiece: null,
             isPossibleToMove: false,
             isSelected: false,
+            isPreviousSelectedSquareMove: false,
+            isPreviousTargetSquareMove: false,
         }) ));
     }
 
@@ -171,6 +212,7 @@ class ChessBoard {
         this.whitePlayerOnCheck = false;
         this.blackPlayerOnCheck = false;
         this.pawnReachedEndOfChessBoard = false;
+        this.deadPieces = [];
     }
 
     public changeModeToSelectMode() {

@@ -5,6 +5,8 @@ export type chessBoardType = {
     currentPiece?: ChessPiece | null,
     isPossibleToMove: boolean,
     isSelected: boolean,
+    isPreviousSelectedSquareMove: boolean,
+    isPreviousTargetSquareMove: boolean,
 }
 
 export type possibleMovesType = boolean[][]
