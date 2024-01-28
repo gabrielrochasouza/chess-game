@@ -13,6 +13,7 @@ export default class ChessPieceRook implements ClassPieceType {
     color: 'white' | 'black';
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));
     kingPiece: boolean = false;
+    pieceHasAlreadyMove: boolean = false;
 
     resetPossibleMoves() {
         this.allPossibleMoves = new Array(8).fill(false).map(() => new Array(8).fill(false));

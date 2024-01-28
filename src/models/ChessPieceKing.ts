@@ -13,6 +13,7 @@ export default class ChessPieceKing implements ClassPieceType {
     kingPiece: boolean = true;
     color: 'white' | 'black';
     allPossibleMoves: possibleMovesType = new Array(8).fill(false).map(() => new Array(8).fill(false));
+    pieceHasAlreadyMove: boolean = false;
 
     resetPossibleMoves() {
         this.allPossibleMoves = new Array(8).fill(false).map(() => new Array(8).fill(false));
@@ -33,6 +34,20 @@ export default class ChessPieceKing implements ClassPieceType {
         if(l + 1 <= 7 && (!chessBoard[l + 1][c].currentPiece || chessBoard[l + 1][c].currentPiece?.color !== this.color)) (allPossibleMoves[l + 1][c] = true);
         if(l - 1 >= 0 && (!chessBoard[l - 1][c].currentPiece || chessBoard[l - 1][c].currentPiece?.color !== this.color)) (allPossibleMoves[l - 1][c] = true);
         
+        // Verify if rock is possible
+        if (!this.pieceHasAlreadyMove) {
+            if (chessBoard[l][7].currentPiece && !chessBoard[l][7].currentPiece.piece.pieceHasAlreadyMove) {
+                if (!chessBoard[l][5].currentPiece && !chessBoard[l][6].currentPiece) {
+                    allPossibleMoves[l][c + 2] = true;
+                }
+            }
+            if (chessBoard[l][0].currentPiece && !chessBoard[l][0].currentPiece.piece.pieceHasAlreadyMove) {
+                if (!chessBoard[l][1].currentPiece && !chessBoard[l][2].currentPiece && !chessBoard[l][3].currentPiece) {
+                    allPossibleMoves[l][c - 2] = true;
+                }
+            }
+        }
+
         return allPossibleMoves;
     }
     setPossibleMoves(chessBoard: chessBoardArrayType, l: number, c: number) {

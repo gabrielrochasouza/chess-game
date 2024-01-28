@@ -77,7 +77,7 @@ class ChessBoard {
         previousLine: number,
         previousColumn: number,
         chessBoardWithPossibleMoves: chessBoardArrayType
-    ) {
+    ): chessBoardArrayType {
         return chessBoardWithPossibleMoves.map((line, targetLine) => line.map((square, targetColumn) => {
             if (square.isPossibleToMove) {
                 return {
@@ -95,18 +95,26 @@ class ChessBoard {
         }));
     }
 
+    private setPieceToSquare(currentPiece: ChessPiece, targetLine: number, targetColumn: number) {
+        const rockMove = !this.selectedPiece.piece.pieceHasAlreadyMove && this.selectedPiece.piece.kingPiece && (targetColumn === 6 || targetColumn === 2);
+        currentPiece.piece.pieceHasAlreadyMove = true;
+        currentPiece.setChessPiece(this.chessBoard, targetLine, targetColumn);
+        if (rockMove) {
+            const rookPreviousColumn = targetColumn === 6 ? 7 : 0;
+            const rookTargetColumn = targetColumn === 6 ? 5 : 3;
+            const rookPiece = this.chessBoard[targetLine][rookPreviousColumn].currentPiece;
+            rookPiece.piece.pieceHasAlreadyMove = true;
+            rookPiece.setChessPiece(this.chessBoard, targetLine, rookTargetColumn);
+        }
+    }
+
     public movePiece(targetLine: number, targetColumn: number) {
         if (this.selectedPiece && this.chessBoard[targetLine][targetColumn].isPossibleToMove) {
-            if (this.verifyIfNextMoveWillBeCheck(this.turnOfPlay, targetLine, targetColumn, this.previousLine, this.previousColumn)) {
-                toast.error('Você não pode mover para aí pois está ou estará em Check');
-                return;
-            }
-
             if (this.chessBoard[targetLine][targetColumn].currentPiece) {
                 this.deadPieces.push(this.chessBoard[targetLine][targetColumn].currentPiece);
             }
             const currentPiece = this.chessBoard[this.previousLine][this.previousColumn].currentPiece;
-            currentPiece.setChessPiece(this.chessBoard, targetLine, targetColumn);
+            this.setPieceToSquare(currentPiece, targetLine, targetColumn);
             
             this.changeModeToSelectMode();
 
@@ -240,9 +248,23 @@ class ChessBoard {
         previousLine: number,
         previousColumn: number,
     ): boolean {
-        const oldPiece = this.chessBoard[targetLine][targetColumn].currentPiece;
+        const targetPiece = this.chessBoard[targetLine][targetColumn].currentPiece;
         const selectedPiece = this.chessBoard[previousLine][previousColumn].currentPiece;
         selectedPiece.setChessPiece(this.chessBoard, targetLine, targetColumn);
+
+        const rockMove = !selectedPiece.piece.pieceHasAlreadyMove && selectedPiece.piece.kingPiece && (targetColumn === 6 || targetColumn === 2) && previousColumn === 4;
+        let rookTargetColumn, rookTargetLine, rookPreviousLine, rookPreviousColumn, rookPiece, rookPieceTarget;
+
+        if (rockMove) {
+            rookPreviousLine = previousLine;
+            rookPreviousColumn = targetColumn === 6 ? 7 : 0; 
+            rookTargetLine = previousLine;
+            rookTargetColumn = targetColumn === 6 ? 5 : 3;
+
+            rookPiece = this.chessBoard[rookPreviousLine][rookPreviousColumn].currentPiece;
+            rookPieceTarget = this.chessBoard[rookTargetLine][rookTargetColumn].currentPiece;
+            rookPiece.setChessPiece(this.chessBoard, rookTargetLine, rookTargetColumn);
+        }
 
         let check = false;
         const colorOfAttacker = colorOfPlayerBeeingAttacked === 'white' ? 'black' : 'white';
@@ -250,7 +272,11 @@ class ChessBoard {
         if(this.verifyIfPlayerIsOnCheck(colorOfAttacker)) {
             check = true;
         }
-        this.revertMove(targetLine, targetColumn, oldPiece, selectedPiece, previousLine, previousColumn);
+        this.revertMove(targetLine, targetColumn, targetPiece, selectedPiece, previousLine, previousColumn);
+        
+        if (rockMove) {
+            this.revertMove(rookTargetLine, rookTargetColumn, rookPieceTarget, rookPiece, rookPreviousLine, rookPreviousColumn);
+        }
 
         return check;
     }

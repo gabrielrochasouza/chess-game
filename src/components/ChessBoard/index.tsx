@@ -67,9 +67,13 @@ function ChessBoard() {
     const element = e.target as HTMLInputElement;
     element.style.zIndex = '10'
     const squareSize = document.querySelector('.square').clientWidth;
-    const [deltaC, deltaL] = element.style.transform.split('(')[1].replace(')', '').split(',').map(n => Math.round(Number(n.slice(0,-2)) / squareSize) )
-    if (((l + deltaL) >= 0 && (l + deltaL) <= 7) && ((c + deltaC) >= 0 && (c + deltaC) <= 7)) {
-        clickOnCellHandler(l + deltaL, c + deltaC)
+    const transform = element.style.transform;
+
+    if (transform) {
+        const [deltaC, deltaL] = element.style.transform.split('(')[1].replace(')', '').split(',').map(n => Math.round(Number(n.slice(0,-2)) / squareSize) )
+        if (((l + deltaL) >= 0 && (l + deltaL) <= 7) && ((c + deltaC) >= 0 && (c + deltaC) <= 7)) {
+            clickOnCellHandler(l + deltaL, c + deltaC)
+        }
     }
   }
 
@@ -83,10 +87,10 @@ function ChessBoard() {
     <div className='chess-board-component'>
         <div className='dead-pieces'>
             <div>
-                {deadPieces.filter(p => p.color === 'black').map(p => <img src={p.piece.svgFile} alt={p.piece.name} />)}
+                {deadPieces.filter(p => p.color === 'black').map((p, i) => <img src={p.piece.svgFile} alt={p.piece.name} key={p.color + i} />)}
             </div>
             <div>
-                {deadPieces.filter(p => p.color === 'white').map(p => <img src={p.piece.svgFile} alt={p.piece.name} />)}
+                {deadPieces.filter(p => p.color === 'white').map((p, i) => <img src={p.piece.svgFile} alt={p.piece.name} key={p.color + i} />)}
             </div>
         </div>
         <div className='board'>

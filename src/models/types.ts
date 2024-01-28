@@ -17,6 +17,7 @@ export type pieceNamesType = 'pawn' | 'queen' | 'king' | 'knight' | 'bishop' | '
 
 export interface ClassPieceType {
     name: pieceNamesType,
+    pieceHasAlreadyMove: boolean,
     svgFile: string,
     color: 'white' | 'black',
     allPossibleMoves: possibleMovesType,
